@@ -5,18 +5,31 @@ const Button = ({onClick, text}) => (
     {text}
     </button>
 )
+const Display = ({counter}) => <div>{counter}</div>
 
 const App = () => {
   const [ counter, setCounter ] = useState(0)
+  console.log('Rendering with counter value', counter)
 
   
-  const increaseTo0ne = () => {setCounter(counter + 1)}
-  const decreaseTo0ne = () => {setCounter(counter - 1)}
-  const reseToZero = () => {setCounter(0)}
+  const increaseTo0ne = () => {
+    console.log('inceasing, value before,', counter)
+    setCounter(counter + 1)
+  }
+
+  const decreaseTo0ne = () => {
+    console.log('decreasing, value before', counter)
+    setCounter(counter - 1)
+  }
+
+  const reseToZero = () => {
+    console.log('resetting to zero, value before', counter)
+    setCounter(0)
+  }
 
   return (
     <div>
-    <div>{counter}</div>
+    <Display counter={counter}/>
     <Button onClick={increaseTo0ne} text='plus'/>
     <Button onClick={decreaseTo0ne} text='minus'/>
     <Button onClick={reseToZero} text='zero'/>
