@@ -6,10 +6,13 @@ const History = ({allClicks}) => {
       <div> This application is used by pressing the button</div>
     )
   }
+  
   return (
     <div> button press history: {allClicks.join(' ')}</div>
   )
 }
+
+const Button = ({onClick, text}) => <button onClick={onClick}>{text}</button>
 
 const App = () => {
   const [left, setLeft] = useState(0)
@@ -21,32 +24,32 @@ const App = () => {
   const handleLeftClick = () => {
     setAll(allClicks.concat('L'))
     console.log('left before', left)
-    const updateLeft = left + 1
-    setLeft(updateLeft)
-    console.log('left after', updateLeft)
-    setTotal(left + right)
+    const updatedLeft = left + 1
+    setLeft(updatedLeft)
+    console.log('left after', updatedLeft)
+    setTotal(updatedLeft + right)
   }
 
   const handleRightClick = () => {
     setAll(allClicks.concat('R'))
     console.log('right before', right)
-    const updateRight = right + 1
-    setRight(updateRight)
-    console.log('right after', updateRight)
-    setTotal(left + right)
+    const updatedRight = right + 1
+    setRight(updatedRight)
+    console.log('right after', updatedRight)
+    setTotal(left + updatedRight)
   }
 
   return(
     <div>
       {left}
-      <button onClick={handleLeftClick}>left</button>
-      <button onClick={handleRightClick}>right</button>
+      <Button onClick={handleLeftClick} text='left' />
+      <Button onClick={handleRightClick} text='right' />
       {right}
       <p>total {total}</p>
       <History allClicks={allClicks}/>
     </div>
   )
-
 }
+console.log();
 
 export default App
