@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
-import Note from "./component/Note"
+import { useState, useEffect } from 'react'
+import Note from './component/Note'
 import noteService from './services/notes'
 
 const App = () => {
@@ -10,17 +10,15 @@ const App = () => {
   const hook = () => {
     noteService
       .getAll()
-      .then(initialNotes => {
-        setNotes(initialNotes)
+      .then(allObjects => {
+        setNotes(allObjects)
       })
   }
-
   useEffect(hook, [])
-  console.log(`render ${notes.length} notes`);
 
   const noteToShow = showAll
     ? notes
-    : notes.filter(note => note.important === true)
+    : notes.filter(n => n.important === true)
 
   const addNote = (event) => {
     event.preventDefault()
@@ -28,55 +26,45 @@ const App = () => {
       content: newNote,
       important: Math.random() < 0.5,
     }
-
     noteService
       .create(newObject)
-      .then(returnedNote => {
-        setNotes(notes.concat(returnedNote))
+      .then(createdObject => {
+        setNotes(notes.concat(createdObject))
         setNewNote('')
       })
+
   }
 
   const handleNewNote = (event) => {
-    console.log(event.target.value)
     setNewNote(event.target.value)
+    console.log("event.target.value ==> ", event.target.value);
   }
 
   const toggleImportance = (id) => {
-    const note = notes.find(note => note.id === id)
+    const note = notes.find(n => n.id === id)
     const updatedNote = { ...note, important: !note.important }
 
     noteService
       .update(id, updatedNote)
-      .then(returnedNote => {
-        setNotes(notes.map(n => n.id === id ? returnedNote : n))
+      .then(updatedObject => {
+        setNotes(notes.map(n => n.id === id ? updatedObject : n))
       })
-      .catch(error => {
-        alert(`${note.content} was already deleted from the server`)
-        setNotes(notes.filter(n => n.id != id))
-      })
+
   }
 
   return (
     <div>
-      <h1> Notes </h1>
-      <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all'}
-        </button>
-      </div>
+      <h2>Notes</h2>
+      <button onClick={() => setShowAll(!showAll)}>
+        Show {showAll ? 'important' : 'all'}
+      </button>
       <ul>
-        {noteToShow.map(note =>
-          <Note
-            key={note.id}
-            note={note}
-            toggleImportance={() => toggleImportance(note.id)}
-          />
-        )}
+        {noteToShow.map(n =>
+          <Note key={n.id} note={n} toggleImportance={() => toggleImportance(n.id)} />)}
       </ul>
-      <form onSubmit={addNote} >
+      <form onSubmit={addNote}>
         <input value={newNote} onChange={handleNewNote} />
-        <button type="submit"> save</button>
+        <button type='submit'>save</button>
       </form>
     </div>
   )
