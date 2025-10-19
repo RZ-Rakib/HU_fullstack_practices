@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 import Note from './component/Note'
 import noteService from './services/notes'
+import Dialog from './component/Dialog'
 
 const App = () => {
   const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedNote, setSelectedNote] = useState(null)
 
   const hook = () => {
     noteService
@@ -80,6 +83,31 @@ const App = () => {
         console.log("error ==> ", error)
       })
   }
+  // dialog handle functions
+  const handleDelete = (note) => {
+    setSelectedNote(note)
+    setDialogOpen(true)
+  }
+
+  const handleYes = () => {
+    if (setSelectedNote) {
+      noteService
+        .remove(selectedNote.id)
+        .then(removedNote => {
+          console.log(removedNote);
+        })
+        .catch(error => {
+          console.log(`${selectedNote} is already deleted from the server, ${error}`)
+        })
+    }
+    setDialogOpen(false)
+    setSelectedNote(null)
+  }
+
+  const handleNo = () => {
+    setDialogOpen(false)
+    setSelectedNote(null)
+  }
 
   return (
     <div>
@@ -88,9 +116,23 @@ const App = () => {
         Show {showAll ? 'important' : 'all'}
       </button>
       <ul>
-        {noteToShow.map(n =>
-          <Note key={n.id} note={n} toggleImportance={() => toggleImportance(n.id)} handleVotes={() => handleVotes(n.id)} />)}
+        {noteToShow.map(note =>
+          <>
+            <Note
+              key={note.id}
+              note={note}
+              toggleImportance={() => toggleImportance(note.id)} handleVotes={() => handleVotes(note.id)}
+              handleDelete={() => handleDelete(note)}
+            />
+          </>
+        )}
       </ul>
+      <Dialog
+        open={dialogOpen}
+        text={'Are you want to delete ?'}
+        handleYes={() => handleYes}
+        handleNo={() => handleNo}
+      />
       <form onSubmit={addNote}>
         <input value={newNote} onChange={handleNewNote} />
         <button type='submit'>save</button>
