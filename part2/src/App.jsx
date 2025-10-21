@@ -17,7 +17,6 @@ const App = () => {
         setNotes(allObjects)
       })
       .catch(error => {
-        alert(`Something went wrong to the server. failed fetching data${error}`)
         console.log("error ==> ", error);
       })
   }
@@ -43,11 +42,10 @@ const App = () => {
     noteService
       .create(newObject)
       .then(createdObject => {
-        setNotes(notes.concat(createdObject))
+        setNotes(prev => prev.concat(createdObject))
         setNewNote('')
       })
       .catch(error => {
-        alert(`failed to add new note`)
         console.log("error ==> ", error);
       })
   }
@@ -63,11 +61,10 @@ const App = () => {
     noteService
       .update(id, updatedNote)
       .then(updatedObject => {
-        setNotes(notes.map(note => note.id === id ? updatedObject : note))
+        setNotes(prev => prev.map(note => note.id === id ? updatedObject : note))
       })
       .catch(error => {
-        alert(`Error happend to update ${updatedNote}. ${error}`)
-        setNotes(notes.filter(note => note.id !== id))
+        console.log(`Error happend to update ${updatedNote}. ${error}`)
       })
   }
   const handleVotes = (id) => {
@@ -77,31 +74,39 @@ const App = () => {
     noteService
       .update(id, updatedVoteNote)
       .then(updatedNote => {
-        setNotes(notes.map(note => note.id === id ? updatedNote : note))
+        setNotes(prev => prev.map(note => note.id === id ? updatedNote : note))
       })
       .catch(error => {
-        console.log("error ==> ", error)
+        console.log("error ==> ", error)s
       })
   }
   // dialog handle functions
   const handleDelete = (note) => {
+    console.log("note ==> ", note);
     setSelectedNote(note)
     setDialogOpen(true)
+
   }
 
   const handleYes = () => {
-    if (setSelectedNote) {
+    console.log();
+
+    if (selectedNote) {
       noteService
         .remove(selectedNote.id)
         .then(removedNote => {
-          console.log(removedNote);
+          console.log("removedNote ==> ", removedNote);
+          setNotes(prev => prev.filter(note => note.id !== selectedNote.id))
+          setDialogOpen(false)
+          setSelectedNote(null)
         })
         .catch(error => {
           console.log(`${selectedNote} is already deleted from the server, ${error}`)
+          setNotes(prev => prev.filter(note => note.id !== selectedNote.id))
+          setDialogOpen(false)
+          setSelectedNote(null)
         })
     }
-    setDialogOpen(false)
-    setSelectedNote(null)
   }
 
   const handleNo = () => {
@@ -117,21 +122,19 @@ const App = () => {
       </button>
       <ul>
         {noteToShow.map(note =>
-          <>
-            <Note
-              key={note.id}
-              note={note}
-              toggleImportance={() => toggleImportance(note.id)} handleVotes={() => handleVotes(note.id)}
-              handleDelete={() => handleDelete(note)}
-            />
-          </>
+          <Note
+            key={note.id}
+            note={note}
+            toggleImportance={() => toggleImportance(note.id)} handleVotes={() => handleVotes(note.id)}
+            handleDelete={() => handleDelete(note)}
+          />
         )}
       </ul>
       <Dialog
         open={dialogOpen}
-        text={'Are you want to delete ?'}
-        handleYes={() => handleYes}
-        handleNo={() => handleNo}
+        text={'Do you want to delete ?'}
+        handleYes={handleYes}
+        handleNo={handleNo}
       />
       <form onSubmit={addNote}>
         <input value={newNote} onChange={handleNewNote} />
