@@ -1,0 +1,31 @@
+h1 {
+  color: green;
+}
+.error {
+  color: red;
+  background: lightblue;
+  border-radius: 10px;
+  border-style: solid;
+  font-size: 20px;
+  font-family: serif;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+.dialog {
+  color: blue;
+  background: rgb(135, 232, 200);
+  border-radius: 10px;
+  border-style: solid;
+  font-size: 20px;
+  font-family: serif;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.yesBtn {
+  color: green;
+}
+
+.noBtn {
+  color: red;
+}

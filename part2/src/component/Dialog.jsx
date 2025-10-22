@@ -11,12 +11,12 @@ const Dialog = ({ open, text, handleYes, handleNo }) => {
   }
 
   return (
-    <div>
+    <div className="dialog">
       <div>
         <p>{text}</p>
         <div>
-          <button onClick={handleYes}>Yes</button>
-          <button onClick={handleNo}>NO</button>
+          <button className="yesBtn" onClick={handleYes}>Yes</button>
+          <button className="noBtn" onClick={handleNo}>NO</button>
         </div>
       </div>
     </div>

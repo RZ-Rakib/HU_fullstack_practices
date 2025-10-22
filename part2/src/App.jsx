@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import Note from './component/Note'
 import noteService from './services/notes'
 import Dialog from './component/Dialog'
+import Notification from './component/Notification'
+import Footer from './component/Footer'
 
 const App = () => {
   const [notes, setNotes] = useState([])
@@ -9,6 +11,7 @@ const App = () => {
   const [showAll, setShowAll] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedNote, setSelectedNote] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const hook = () => {
     noteService
@@ -42,11 +45,18 @@ const App = () => {
     noteService
       .create(newObject)
       .then(createdObject => {
+        setErrorMessage(`Note ${createdObject.content} is created.`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 3000);
         setNotes(prev => prev.concat(createdObject))
         setNewNote('')
       })
       .catch(error => {
-        console.log("error ==> ", error);
+        setErrorMessage(`Note ${newObject.content} is failed to send to server`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 3000);
       })
   }
 
@@ -64,7 +74,11 @@ const App = () => {
         setNotes(prev => prev.map(note => note.id === id ? updatedObject : note))
       })
       .catch(error => {
-        console.log(`Error happend to update ${updatedNote}. ${error}`)
+        setErrorMessage(`Note ${updatedNote.content} is already remoed from server`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 3000)
+        setNotes(prev => prev.filter(note => note.id !== id))
       })
   }
   const handleVotes = (id) => {
@@ -77,7 +91,11 @@ const App = () => {
         setNotes(prev => prev.map(note => note.id === id ? updatedNote : note))
       })
       .catch(error => {
-        console.log("error ==> ", error)s
+        setErrorMessage(`Note ${updatedNote.content} is already remoed from server`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 3000)
+        setNotes(prev => prev.filter(note => note.id !== id))
       })
   }
   // dialog handle functions
@@ -95,13 +113,19 @@ const App = () => {
       noteService
         .remove(selectedNote.id)
         .then(removedNote => {
-          console.log("removedNote ==> ", removedNote);
+          setErrorMessage(`${removedNote.content} is sucessfully removed`)
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 3000);
           setNotes(prev => prev.filter(note => note.id !== selectedNote.id))
           setDialogOpen(false)
           setSelectedNote(null)
         })
         .catch(error => {
-          console.log(`${selectedNote} is already deleted from the server, ${error}`)
+          setErrorMessage(`Note ${updatedNote.content} is already removed from server`)
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 3000)
           setNotes(prev => prev.filter(note => note.id !== selectedNote.id))
           setDialogOpen(false)
           setSelectedNote(null)
@@ -116,7 +140,8 @@ const App = () => {
 
   return (
     <div>
-      <h2>Notes</h2>
+      <h1>Notes</h1>
+      <Notification message={errorMessage} />
       <button onClick={() => setShowAll(!showAll)}>
         Show {showAll ? 'important' : 'all'}
       </button>
@@ -140,6 +165,7 @@ const App = () => {
         <input value={newNote} onChange={handleNewNote} />
         <button type='submit'>save</button>
       </form>
+      <Footer />
     </div>
   )
 }
