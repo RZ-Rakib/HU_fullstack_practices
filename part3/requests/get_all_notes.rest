@@ -11,8 +11,11 @@ DELETE http://localhost:3001/api/notes/2
 ### update note by id
 PUT http://localhost:3001/api/notes/1
 
+### create a new note
+POST http://localhost:3001/api/notes
 Content-Type: application/json
+
 {
-    "content": "HTML is easy",
+    "content": "Hello Rakib",
     "important": true
 }

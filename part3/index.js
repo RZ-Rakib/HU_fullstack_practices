@@ -112,21 +112,29 @@ const generatedId = () => {
   maxId = notes.length > 0 
   ? Math.max(...notes.map(n => Number(n.id)))
   : 0
-
   return String(maxId + 1)
 }
 
 app.post('/api/notes', (req, res) => {
-  const {content, important} = req.body
-  if(!content) {
-    winston.warn(`POST /api/notes - Content missing`)
-    return res.status(400).json({error: 'content missing'})
-  }
+  try {
+    const {content, important} = req.body
+    if(!content) {
+      winston.warn(`POST /api/notes - Content missing`)
+      return res.status(400).json({error: 'content missing'})
+    }
+  
+    const newNote = {
+      id: generatedId(),
+      content: content,
+      important: important ?? false
+    }
 
-  newNote = {
-    id: generatedId(),
-    content: content,
-    important: important || false
+    notes = notes.concat(newNote)
+    res.status(201).json(newNote)
+    winston.info(`New note ${content} is successfully created`)
+  } catch (error) {
+    winston.error(`'POST' /api/notes/ - Error creating note with ID: ${error.message}`)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
