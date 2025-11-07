@@ -1,8 +1,11 @@
 const express = require('express')
-const winston = require('./loggers')
+const winston = require('./loggers/winston')
+const morganMiddleware = require('./loggers/morgan')
 const app = express()
 
 app.use(express.json())
+
+app.use(morganMiddleware)
 
 let notes = [
   {

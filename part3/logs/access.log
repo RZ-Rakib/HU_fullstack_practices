@@ -1,0 +1,2 @@
+{"time":"2025-11-07T22:39:43.141Z","method":"GET","url":"/api/notes/","status":"200","response_time":"15.171 ms","content_length":"232","user_agent":"vscode-restclient"}
+{"time":"2025-11-07T22:40:14.436Z","method":"GET","url":"/api/notes/1","status":"200","response_time":"16.450 ms","content_length":"52","user_agent":"vscode-restclient"}
