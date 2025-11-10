@@ -13,6 +13,10 @@ app.use(cors({
   origin: 'http://localhost:5173'
 }))
 
+app.get('/', (req, res) => {
+  res.send('Notes API is running successfully on Render!');
+});
+
 let notes = [
   {
     id: "1",
@@ -147,6 +151,8 @@ app.post('/api/notes', (req, res) => {
   }
 })
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT)
-console.log(`Server running on http://localhost:${PORT}`);
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  winston.info(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+});
