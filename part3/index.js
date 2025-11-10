@@ -20,17 +20,20 @@ let notes = [
   {
     id: "1",
     content: "HTML is easy",
-    important: true
+    important: true,
+    vote:2
   },
   {
     id: "2",
     content: "Browser can execute only JavaScript",
-    important: false
+    important: false,
+    vote: 4
   },
   {
     id: "3",
     content: "GET and POST are the most important methods of HTTP protocol",
-    important: true
+    important: true,
+    vote: 5
   }
 ]
 app.get('/api/notes', (req, res) => {
