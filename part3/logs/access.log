@@ -1,2 +1,24 @@
 {"time":"2025-11-07T22:39:43.141Z","method":"GET","url":"/api/notes/","status":"200","response_time":"15.171 ms","content_length":"232","user_agent":"vscode-restclient"}
 {"time":"2025-11-07T22:40:14.436Z","method":"GET","url":"/api/notes/1","status":"200","response_time":"16.450 ms","content_length":"52","user_agent":"vscode-restclient"}
+[0mGET /api/notes [32m200[0m 11.038 ms - 232[0m
+[0mGET /api/notes [32m200[0m 3.738 ms - 232[0m
+[0mGET /api/notes [32m200[0m 1.745 ms - 232[0m
+[0mGET /api/notes [32m200[0m 9.587 ms - 232[0m
+[0mGET /api/notes [32m200[0m 16.380 ms - 232[0m
+[0mGET /api/notes [32m200[0m 4.178 ms - 232[0m
+[0mGET /api/notes [32m200[0m 3.183 ms - 232[0m
+[0mGET /api/notes [32m200[0m 3.726 ms - 232[0m
+[0mGET / [33m404[0m 14.550 ms - 139[0m
+[0mGET /api/notes/1 [36m304[0m 15.202 ms - -[0m
+[0mGET /api/notes [32m200[0m 15.733 ms - 232[0m
+[0mGET /api/notes [32m200[0m 0.827 ms - 232[0m
+[0mGET /api/notes [32m200[0m 0.233 ms - 232[0m
+[0mGET /api/notes [32m200[0m 0.370 ms - 232[0m
+[0mGET /api/notes [32m200[0m 0.845 ms - 232[0m
+[0mGET /api/notes [32m200[0m 6.265 ms - 232[0m
+[0mGET /api/notes [32m200[0m 0.623 ms - 232[0m
+[0mGET / [33m404[0m 12.933 ms - 139[0m
+[0mGET /api/notes [32m200[0m 11.913 ms - 232[0m
+[0mGET /favicon.ico [33m404[0m 1.022 ms - 150[0m
+[0mGET /api/notes [32m200[0m 5.140 ms - 232[0m
+[0mGET /api/notes [32m200[0m 0.504 ms - 232[0m

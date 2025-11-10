@@ -1,11 +1,17 @@
 const express = require('express')
 const winston = require('./loggers/winston')
 const morganMiddleware = require('./loggers/morgan')
+const cors = require('cors')
 const app = express()
 
 app.use(express.json())
 
+
 app.use(morganMiddleware)
+
+app.use(cors({
+  origin: 'http://localhost:5173'
+}))
 
 let notes = [
   {
@@ -141,6 +147,6 @@ app.post('/api/notes', (req, res) => {
   }
 })
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT)
 console.log(`Server running on http://localhost:${PORT}`);
