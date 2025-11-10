@@ -6,16 +6,15 @@ const app = express()
 
 app.use(express.json())
 
-
 app.use(morganMiddleware)
 
 app.use(cors({
   origin: 'http://localhost:5173'
 }))
 
-app.get('/', (req, res) => {
-  res.send('Notes API is running successfully on Render!');
-});
+// app.get('/', (req, res) => {
+//   res.send('Notes API is running successfully on Render!');
+// });
 
 let notes = [
   {
@@ -51,7 +50,7 @@ app.get('/api/notes/:id', (req, res) => {
       winston.warn(`'GET' api/notes/:id - ID is missing`)
       return res.status(400).json({error: 'ID missing'})
     }
-
+    
     const note = notes.find( n => n.id === id)
     if (note){
       res.json(note)
@@ -73,7 +72,7 @@ app.delete('/api/notes/:id', (req, res) => {
       winston.warn(`'DELETE' api/notes/:id - ID is missing`)
       return res.status(400).json({error: 'ID missing'})
     }
-
+    
     notes = notes.filter(n => n.id !== id)
     res.status(204).end()
     winston.info(`'DELETE' api/notes/:id - note with ID ${id} deleted`)
@@ -87,32 +86,32 @@ app.put('/api/notes/:id', (req, res) => {
   try {
     const id = req.params.id
     const body = req.body
-
+    
     if (!id) {
       winston.warn(`'PUT' /api/notes/:id - ID is missing`)
       return res.status(400).json({ error: 'ID missing' })
     }
-
+    
     if (!body.content) {
       winston.warn(`'PUT' /api/notes/:id - Content is missing`)
       return res.status(400).json({ error: 'Content missing' })
     }
-
+    
     const noteIndex = notes.findIndex(n => n.id === id)
     if (noteIndex === -1) {
       winston.warn(`'PUT' /api/notes/:id - Note with ID ${id} not found`)
       return res.status(404).json({ error: 'Note not found' })
     }
-
+    
     // Update note fields
     const updatedNote = {
       ...notes[noteIndex],
       content: body.content,
       important: body.important ?? notes[noteIndex].important,
     }
-
+    
     notes[noteIndex] = updatedNote
-
+    
     winston.info(`'PUT' /api/notes/:id - Note with ID ${id} updated successfully`)
     res.status(200).json(updatedNote)
   } catch (error) {
@@ -135,13 +134,13 @@ app.post('/api/notes', (req, res) => {
       winston.warn(`POST /api/notes - Content missing`)
       return res.status(400).json({error: 'content missing'})
     }
-  
+    
     const newNote = {
       id: generatedId(),
       content: content,
       important: important ?? false
     }
-
+    
     notes = notes.concat(newNote)
     res.status(201).json(newNote)
     winston.info(`New note ${content} is successfully created`)
@@ -150,6 +149,10 @@ app.post('/api/notes', (req, res) => {
     res.status(500).json({ error: 'Server error' })
   }
 })
+
+app.use((express.static('dist')))
+
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
