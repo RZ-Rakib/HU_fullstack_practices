@@ -1,44 +1,25 @@
 const express = require('express')
+const Note = require('./models/note')
 const winston = require('./loggers/winston')
 const morgan = require('morgan')
+require('dotenv').config()
 const app = express()
 
 app.use(express.json())
 
-app.use(morgan('combined'))
+app.use(morgan('dev'))
 
-// app.get('/', (req, res) => {
-//   res.send('Notes API is running successfully on Render!');
-// });
-
-let notes = [
-  {
-    id: "1",
-    content: "HTML is easy",
-    important: true,
-    vote:2
-  },
-  {
-    id: "2",
-    content: "Browser can execute only JavaScript",
-    important: false,
-    vote: 4
-  },
-  {
-    id: "3",
-    content: "GET and POST are the most important methods of HTTP protocol",
-    important: true,
-    vote: 5
-  }
-]
 app.get('/api/notes', (req, res) => {
-  try {
-    res.json(notes)
-    winston.info(`'GET' api/notes - fetched data`)
-  } catch (error) {
-    winston.error(`'GET' api/notes - Error fetching notes from server', ${error.message}`)
-    res.status(500).end()
-  }
+    Note
+      .find({})
+      .then(notes => {
+        res.json(notes)
+        winston.info(`'GET' api/notes - fetched data`)
+      })
+      .catch(error => {
+        winston.error(`'GET' api/notes - Error fetching notes from server', ${error.message}`)
+        res.status(500).end()
+      })
 })
 
 app.get('/api/notes/:id', (req, res) => {
@@ -148,11 +129,10 @@ app.post('/api/notes', (req, res) => {
   }
 })
 
-app.use((express.static('dist')))
+app.use(express.static('dist'))
 
 
-
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   winston.info(`Server running on port ${PORT}`);
   console.log(`Server running on port ${PORT}`);
