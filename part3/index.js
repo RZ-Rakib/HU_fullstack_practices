@@ -2,135 +2,128 @@ const express = require('express')
 const Note = require('./models/note')
 const winston = require('./loggers/winston')
 const morgan = require('morgan')
-require('dotenv').config()
 const app = express()
+require('dotenv').config()
 
+app.use(express.static('dist'))
 app.use(express.json())
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms '))
 
-app.use(morgan('dev'))
-
-app.get('/api/notes', (req, res) => {
+app.get('/api/notes', (req, res, next) => {
     Note
       .find({})
       .then(notes => {
         res.json(notes)
-        winston.info(`'GET' api/notes - fetched data`)
       })
-      .catch(error => {
-        winston.error(`'GET' api/notes - Error fetching notes from server', ${error.message}`)
-        res.status(500).end()
-      })
+      .catch(error => next(error))
 })
 
-app.get('/api/notes/:id', (req, res) => {
-  try {
+app.get('/api/notes/:id', (req, res, next) => {
     const id = req.params.id
     if(!id) {
-      winston.warn(`'GET' api/notes/:id - ID is missing`)
+      winston.warn(`'GET' api/notes/:id - ID missing in request`)
       return res.status(400).json({error: 'ID missing'})
     }
     
-    const note = notes.find( n => n.id === id)
-    if (note){
-      res.json(note)
-      winston.info(`'GET' api/notes/:id - Note with ID ${id} found`)
-    }else {
-      res.status(404).end('invalid id')
-      winston.warn(`'GET' api/notes/:id - note with ID ${id} not found`)
-    }
-  } catch (error) {
-    res.status(500).end()
-    winston.error(`'GET' api/notes/:id - Error fetching notes from server', ${error.message}`)
-  }
+    Note
+      .findById(id)
+      .then(note => {
+        if (note){
+          res.json(note)
+          winston.info(`'GET' api/notes/:id - Note with ID ${id} found`)
+        }else {
+          res.status(404).end('invalid id')
+          winston.warn(`'GET' api/notes/:id - note with ID ${id} not found`)
+        }
+      })
+      .catch (error => next(error))
 })
 
-app.delete('/api/notes/:id', (req, res) => {
-  try {
+app.delete('/api/notes/:id', (req, res, error) => {
     const id = req.params.id
     if (!id){
       winston.warn(`'DELETE' api/notes/:id - ID is missing`)
       return res.status(400).json({error: 'ID missing'})
     }
-    
-    notes = notes.filter(n => n.id !== id)
-    res.status(204).end()
-    winston.info(`'DELETE' api/notes/:id - note with ID ${id} deleted`)
-  } catch (error) {
-    res.status(500).end()
-    winston.error(`'DELETE' api/notes/:id - Error deleting note with ID ${id} from server', ${error.message}`)
-  }
+    Note.findByIdAndDelete(id)
+      .then( result => {
+        res.status(204).end()
+        winston.info(`'DELETE' api/notes/:id - note with ID ${id} deleted`)
+      })
+      .catch(error => next(error))
 })
 
-app.put('/api/notes/:id', (req, res) => {
-  try {
+app.put('/api/notes/:id', (req, res, next) => {
     const id = req.params.id
-    const body = req.body
+    const {content, important} = req.body
     
     if (!id) {
       winston.warn(`'PUT' /api/notes/:id - ID is missing`)
       return res.status(400).json({ error: 'ID missing' })
     }
     
-    if (!body.content) {
+    if (!content) {
       winston.warn(`'PUT' /api/notes/:id - Content is missing`)
       return res.status(400).json({ error: 'Content missing' })
     }
     
-    const noteIndex = notes.findIndex(n => n.id === id)
-    if (noteIndex === -1) {
-      winston.warn(`'PUT' /api/notes/:id - Note with ID ${id} not found`)
-      return res.status(404).json({ error: 'Note not found' })
-    }
-    
-    // Update note fields
-    const updatedNote = {
-      ...notes[noteIndex],
-      content: body.content,
-      important: body.important ?? notes[noteIndex].important,
-    }
-    
-    notes[noteIndex] = updatedNote
-    
-    winston.info(`'PUT' /api/notes/:id - Note with ID ${id} updated successfully`)
-    res.status(200).json(updatedNote)
-  } catch (error) {
-    winston.error(`'PUT' /api/notes/:id - Error updating note with ID ${req.params.id}: ${error.message}`)
-    res.status(500).json({ error: 'Server error' })
-  }
+    Note.findById(id)
+      .then( note => {
+        if (!note) {
+          winston.warn(`'PUT' /api/notes/:id - Note with ID ${id} not found`)
+          return res.status(404).json({ error: 'Note not found' })
+        }
+        note.content =  content
+        note.important = important ?? note.important
+
+        return note.save().then(updatedNote => {
+            winston.info(`'PUT' /api/notes/:id - Note with ID ${id} updated successfully`)
+            res.status(200).json({updatedNote: `${updatedNote}` })
+          })
+        })
+        .catch(error => next(error))
 })
 
-const generatedId = () => {
-  maxId = notes.length > 0 
-  ? Math.max(...notes.map(n => Number(n.id)))
-  : 0
-  return String(maxId + 1)
-}
-
-app.post('/api/notes', (req, res) => {
-  try {
+app.post('/api/notes', (req, res, next) => {
     const {content, important} = req.body
     if(!content) {
       winston.warn(`POST /api/notes - Content missing`)
       return res.status(400).json({error: 'content missing'})
     }
     
-    const newNote = {
-      id: generatedId(),
+    const note = new Note ({
       content: content,
-      important: important ?? false
-    }
+      important: important ?? false,
+    })
     
-    notes = notes.concat(newNote)
-    res.status(201).json(newNote)
-    winston.info(`New note ${content} is successfully created`)
-  } catch (error) {
-    winston.error(`'POST' /api/notes/ - Error creating note with ID: ${error.message}`)
-    res.status(500).json({ error: 'Server error' })
-  }
+    note
+      .save()
+      .then(savedNote => {
+        winston.info(`New note ${savedNote.content} is successfully created and saved in database`)
+        res.status(201).json(savedNote)
+      })
+      .catch (error => next(error))
 })
 
-app.use(express.static('dist'))
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
 
+// handler of requests with unknown endpoint
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  winston.error(error.stack || error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+// this has to be the last loaded middleware, also all the routes should be registered before this!
+app.use(errorHandler)
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

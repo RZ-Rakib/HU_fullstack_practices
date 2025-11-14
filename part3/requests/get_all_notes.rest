@@ -1,21 +1,27 @@
 
 ### fetch all notes
-GET http://localhost:3001/api/notes/
+GET http://localhost:10000/api/notes/
 
 ### fetch note by id
-GET http://localhost:3001/api/notes/1
+GET http://localhost:10000/api/notes/1
 
 ### delete note by id
-DELETE http://localhost:3001/api/notes/2
+DELETE http://localhost:10000/api/notes/6915e7bc380abb48527e3efa
 
 ### update note by id
-PUT http://localhost:3001/api/notes/1
-
-### create a new note
-POST https://notes-test-server.onrender.com/api/notes
+PUT http://localhost:10000/api/notes/69149d6447d356b5ed2919c3
 Content-Type: application/json
 
 {
-    "content": "Hello Rakib",
-    "important": true
+    "content": "Its a break day",
+    "important": false
+}
+
+### create a new note
+POST http://localhost:10000/api/notes
+Content-Type: application/json
+
+{
+    "content": "King kong",
+    "important": false
 }
