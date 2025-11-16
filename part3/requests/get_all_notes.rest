@@ -22,6 +22,6 @@ POST http://localhost:10000/api/notes
 Content-Type: application/json
 
 {
-    "content": "King kong",
+    "content": "lol",
     "important": false
 }

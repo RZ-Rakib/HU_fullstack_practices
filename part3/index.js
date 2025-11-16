@@ -86,11 +86,7 @@ app.put('/api/notes/:id', (req, res, next) => {
 
 app.post('/api/notes', (req, res, next) => {
     const {content, important} = req.body
-    if(!content) {
-      winston.warn(`POST /api/notes - Content missing`)
-      return res.status(400).json({error: 'content missing'})
-    }
-    
+
     const note = new Note ({
       content: content,
       important: important ?? false,
@@ -106,18 +102,21 @@ app.post('/api/notes', (req, res, next) => {
 })
 
 const unknownEndpoint = (request, response) => {
+  winston.warn('Unknown endpoint')
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
 // handler of requests with unknown endpoint
 app.use(unknownEndpoint)
 
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, req, res, next) => {
   winston.error(error.stack || error.message)
 
   if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } 
+    return res.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return res.status(400).send({error: error.message})
+  }
 
   next(error)
 }
