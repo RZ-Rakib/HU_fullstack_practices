@@ -31,9 +31,8 @@ const App = () => {
 
   const addNote = (event) => {
     event.preventDefault()
-    const normalize = newNote.trim().toLowerCase()
 
-    if (notes.some(note => note.content.toLowerCase() === normalize)) {
+    if (notes.some(note => note.content.trim().toLowerCase() === newNote.trim().toLowerCase())) {
       alert(`${newNote} is already exist in the server.`)
       return
     }
@@ -53,7 +52,7 @@ const App = () => {
         setNewNote('')
       })
       .catch(error => {
-        setErrorMessage(`Note ${newObject.content} is failed to send to server`)
+        setErrorMessage(error.response?.data?.error || 'Something went wrong')
         setTimeout(() => {
           setErrorMessage(null)
         }, 3000);
@@ -74,7 +73,7 @@ const App = () => {
         setNotes(prev => prev.map(note => note.id === id ? updatedObject : note))
       })
       .catch(error => {
-        setErrorMessage(`Note ${updatedNote.content} is already remoed from server`)
+        setErrorMessage(`${error.response.data.error}`)
         setTimeout(() => {
           setErrorMessage(null)
         }, 3000)
@@ -91,7 +90,7 @@ const App = () => {
         setNotes(prev => prev.map(note => note.id === id ? updatedNote : note))
       })
       .catch(error => {
-        setErrorMessage(`Note ${updatedNote.content} is already remoed from server`)
+        setErrorMessage(`${error.response.data.error}`)
         setTimeout(() => {
           setErrorMessage(null)
         }, 3000)
@@ -107,13 +106,12 @@ const App = () => {
   }
 
   const handleYes = () => {
-    console.log();
-
+    const deletedNoteContent = selectedNote.content
     if (selectedNote) {
       noteService
         .remove(selectedNote.id)
-        .then(removedNote => {
-          setErrorMessage(`${removedNote.content} is sucessfully removed`)
+        .then(() => {
+          setErrorMessage(`${deletedNoteContent} is sucessfully removed`)
           setTimeout(() => {
             setErrorMessage(null)
           }, 3000);
@@ -122,7 +120,7 @@ const App = () => {
           setSelectedNote(null)
         })
         .catch(error => {
-          setErrorMessage(`Note ${updatedNote.content} is already removed from server`)
+          setErrorMessage(`${error.response.data.error}`)
           setTimeout(() => {
             setErrorMessage(null)
           }, 3000)
@@ -150,7 +148,8 @@ const App = () => {
           <Note
             key={note.id}
             note={note}
-            toggleImportance={() => toggleImportance(note.id)} handleVotes={() => handleVotes(note.id)}
+            toggleImportance={() => toggleImportance(note.id)}
+            handleVotes={() => handleVotes(note.id)}
             handleDelete={() => handleDelete(note)}
           />
         )}
