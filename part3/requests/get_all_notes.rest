@@ -9,12 +9,12 @@ GET http://localhost:10000/api/notes/1
 DELETE http://localhost:10000/api/notes/6915e7bc380abb48527e3efa
 
 ### update note by id
-PUT http://localhost:10000/api/notes/69149d6447d356b5ed2919c3
+PUT http://localhost:10000/api/notes/691b114ef3ecf5de15e75519
 Content-Type: application/json
 
 {
-    "content": "Its a break day",
-    "important": false
+    "content": "",
+    "important": true
 }
 
 ### create a new note

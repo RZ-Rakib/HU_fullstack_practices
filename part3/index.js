@@ -57,16 +57,6 @@ app.put('/api/notes/:id', (req, res, next) => {
     const id = req.params.id
     const {content, important} = req.body
     
-    if (!id) {
-      winston.warn(`'PUT' /api/notes/:id - ID is missing`)
-      return res.status(400).json({ error: 'ID missing' })
-    }
-    
-    if (!content) {
-      winston.warn(`'PUT' /api/notes/:id - Content is missing`)
-      return res.status(400).json({ error: 'Content missing' })
-    }
-    
     Note.findById(id)
       .then( note => {
         if (!note) {
@@ -78,7 +68,7 @@ app.put('/api/notes/:id', (req, res, next) => {
 
         return note.save().then(updatedNote => {
             winston.info(`'PUT' /api/notes/:id - Note with ID ${id} updated successfully`)
-            res.status(200).json({updatedNote: `${updatedNote}` })
+            res.status(200).json(updatedNote)
           })
         })
         .catch(error => next(error))
