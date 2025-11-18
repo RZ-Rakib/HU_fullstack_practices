@@ -6,9 +6,9 @@ const url = process.env.MONGODB_URI
 
 mongoose.set('strictQuery',false)
 
-mongoose.connect(url, {family: 4})
-  .then(result => {
-    winston.info(`'Mongodb': Mongodb connected`)
+mongoose.connect(url, { family: 4 })
+  .then(() => {
+    winston.info('\'Mongodb\': Mongodb connected')
   })
   .catch(error => {
     winston.error(`'Mongodb': Error connecting to Mongodb, ${error.message}`)
