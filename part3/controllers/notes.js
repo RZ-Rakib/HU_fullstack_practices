@@ -1,86 +1,107 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
 const logger = require('../utils/logger')
+const mongoose = require('mongoose')
 
-notesRouter.get('/', (req, res, next) => {
-  Note
-    .find({})
-    .then(notes => {
-      res.json(notes)
-    })
-    .catch(error => next(error))
-})
+notesRouter.get('/', async (req, res, next) => {
+  try {
+    const notes = await Note.find({})
+    return res.json(notes)
 
-notesRouter.get('/:id', (req, res, next) => {
-  const id = req.params.id
-  if(!id) {
-    logger.warn('\'GET\' api/notes/:id - ID missing in request')
-    return res.status(400).json({ error: 'ID missing' })
+  } catch (error) {
+    next(error)
   }
-
-  Note
-    .findById(id)
-    .then(note => {
-      if (note){
-        res.json(note)
-        logger.info(`'GET' api/notes/:id - Note with ID ${ id } found`)
-      }else {
-        res.status(404).end('invalid id')
-        logger.warn(`'GET' api/notes/:id - note with ID ${ id } not found`)
-      }
-    })
-    .catch(error => next(error))
 })
 
-notesRouter.delete('/:id', (req, res, next) => {
-  const id = req.params.id
-  if (!id){
-    logger.warn('\'DELETE\' api/notes/:id - ID is missing')
-    return res.status(400).json({ error: 'ID missing' })
+notesRouter.get('/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id
+
+    if(!mongoose.Types.ObjectId.isValid(id)) {
+      logger.warn('\'GET\' api/notes/:id - malformatted')
+      return res.status(400).json({ error: 'malformatted id' })
+    }
+
+    const note = await Note.findById(id)
+
+    if (note){
+      logger.info(`'GET' api/notes/:id - Note with ID ${ id } found`)
+      return res.json(note)
+    }
+    logger.warn(`'GET' api/notes/:id - note with ID ${ id } not found`)
+    return res.status(404).json({ error: 'invalid id' })
+
+  } catch (error) {
+    next(error)
   }
-  Note.findByIdAndDelete(id)
-    .then(() => {
-      res.status(204).end()
-      logger.info(`'DELETE' api/notes/:id - note with ID ${ id } deleted`)
-    })
-    .catch(error => next(error))
 })
 
-notesRouter.put('/:id', (req, res, next) => {
-  const id = req.params.id
-  const { content, important } = req.body
+notesRouter.delete('/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id
 
-  Note.findById(id)
-    .then( note => {
-      if (!note) {
-        logger.warn(`'PUT' /api/notes/:id - Note with ID ${ id } not found`)
-        return res.status(404).json({ error: 'Note not found' })
-      }
-      note.content =  content
-      note.important = important ?? note.important
-      return note.save().then(updatedNote => {
-        logger.info(`'PUT' /api/notes/:id - Note with ID ${ id } updated successfully`)
-        res.status(200).json(updatedNote)
-      })
-    })
-    .catch(error => next(error))
+    if (!mongoose.Types.ObjectId.isValid(id)){
+      logger.warn('\'DELETE\' api/notes/:id - malformatted id')
+      return res.status(400).json({ error: 'malformatted id' })
+    }
+
+    const deletedNote = await Note.findByIdAndDelete(id)
+
+    if (!deletedNote) {
+      logger.warn(`DELETE /api/notes/:id - note with ID ${id} not found`)
+      return res.status(404).json({ error: 'invalid id' })
+    }
+
+    logger.info(`'DELETE' api/notes/:id - note with ID ${ id } deleted`)
+    res.status(204).end()
+
+  } catch (error) {
+    next(error)
+  }
 })
 
-notesRouter.post('/', (req, res, next) => {
-  const { content, important } = req.body
+notesRouter.put('/:id', async (req, res, next) => {
+  try {
+    const id = req.params.id
+    const { content, important } = req.body
 
-  const note = new Note ({
-    content: content,
-    important: important ?? false,
-  })
+    const note = await Note.findById(id)
 
-  note
-    .save()
-    .then(savedNote => {
-      logger.info(`New note ${ savedNote.content } is successfully created and saved in database`)
-      res.status(201).json(savedNote)
+    if (!note) {
+      logger.warn(`'PUT' /api/notes/:id - Note with ID ${ id } not found`)
+      return res.status(404).json({ error: 'Note not found' })
+    }
+
+    note.content =  content
+    note.important = important ?? note.important
+
+    const updatedNote = await note.save()
+
+    logger.info(`'PUT' /api/notes/:id - Note with ID ${ id } updated successfully`)
+    return res.status(200).json(updatedNote)
+
+  } catch (error) {
+    next(error)
+  }
+})
+
+notesRouter.post('/', async (req, res, next) => {
+  try {
+    const { content, important } = req.body
+
+    const note = new Note ({
+      content: content,
+      important: important ?? false,
     })
-    .catch (error => next(error))
+
+    const savedNote = await note.save()
+
+    logger.info(`New note ${ savedNote.content } is successfully created and saved in database`)
+    return res.status(201).json(savedNote)
+
+  } catch (error) {
+    next(error)
+  }
 })
 
 module.exports = notesRouter
