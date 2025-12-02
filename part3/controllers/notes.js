@@ -96,7 +96,7 @@ notesRouter.post('/', async (req, res, next) => {
 
     if (!user) {
       logger.warn('user id is missing')
-      res.status(400).json({ error: 'user id missing or invalid' })
+      return res.status(400).json({ error: 'user id missing or invalid' })
     }
 
     const note = new Note ({

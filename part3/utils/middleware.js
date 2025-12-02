@@ -13,16 +13,20 @@ const unknownEndpoint = (request, response) => {
 }
 
 const errorHandler = (error, request, response, next) => {
-  logger.error(error.message)
+  logger.info('FULL ERROR ->', error)
+  logger.info('name:', error.name)
+  logger.info('code:', error.code)
+  logger.info('message:', error.message)
+  logger.info('keyValue:', error.keyValue)
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
-  } else if (error.name === 'MongoServerError' && error.code === 11000) {
-    const field = Object.keys(error.keyValue)[0]
-    return response.status(400).json({ error: `${field} must be unique` })
+  } else if ((error.name === 'MongoServerError' || error.name === 'MongoError') && error.code === 11000) {
+    return response.status(400).json({ error: 'expected `username` to be unique' })
   }
+
 
   next(error)
 }

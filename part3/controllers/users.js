@@ -30,7 +30,7 @@ usersRouter.get('/', async (req, res, next) => {
   try {
     const users = await User
       .find({})
-      .populate('notes', { content: 1, important: 1, id: 0 })
+      .populate('notes', { content: 1, important: 1 })
 
     logger.info('users fetched successfully')
     res.json(users)

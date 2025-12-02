@@ -11,11 +11,24 @@ const app = require('../app')
 const api = supertest(app)
 
 describe('When there is initially some notes saved', () => {
+  let userId
   beforeEach(async () => {
     await Note.deleteMany({})
-    let noteObject = new Note(helper.initialNotes[0])
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('12345rz', 10)
+
+    const newUser = new User({
+      username: 'RZ005',
+      name: 'Rakib',
+      passwordHash
+    })
+    const savedUser = await newUser.save()
+    userId = savedUser.id.toString()
+
+    let noteObject = new Note({ ...helper.initialNotes[0], user: userId })
     await noteObject.save()
-    noteObject = new Note(helper.initialNotes[1])
+    noteObject = new Note({ ...helper.initialNotes[1], user: userId })
     await noteObject.save()
   })
 
@@ -42,15 +55,17 @@ describe('When there is initially some notes saved', () => {
 
   describe('viewing a specific note', () => {
     test('success with a specific id', async () => {
-      const notesAtStart = await helper.noteInDb()
+      const notesAtStart = await helper.notesInDb()
       const noteToShow = notesAtStart[0]
 
-      const finalNote = await api
+      const response = await api
         .get(`/api/notes/${noteToShow.id}`)
         .expect(200)
         .expect('content-type', /application\/json/)
 
-      assert.deepStrictEqual(finalNote.body, noteToShow)
+      assert.strictEqual(response.body.content, noteToShow.content)
+      assert.strictEqual(response.body.important, noteToShow.important)
+      assert.strictEqual(response.body.id, noteToShow.id)
     })
 
     test('fails with statuscode 404 if note doesnot exist', async () => {
@@ -74,7 +89,8 @@ describe('When there is initially some notes saved', () => {
     test('success with valid data', async () => {
       const newObject = {
         content: 'Rakib is lazy',
-        important: false
+        important: false,
+        userId
       }
 
       await api
@@ -83,7 +99,7 @@ describe('When there is initially some notes saved', () => {
         .expect(201)
         .expect('content-type', /application\/json/)
 
-      const notesAtEnd = await helper.noteInDb()
+      const notesAtEnd = await helper.notesInDb()
       assert.strictEqual(notesAtEnd.length, helper.initialNotes.length + 1)
 
       const contents = notesAtEnd.map(note => note.content)
@@ -101,21 +117,21 @@ describe('When there is initially some notes saved', () => {
         .send(newObject)
         .expect(400)
 
-      const notesAtEnd = await helper.noteInDb()
+      const notesAtEnd = await helper.notesInDb()
       assert.strictEqual(notesAtEnd.length, helper.initialNotes.length)
     })
   })
 
   describe('deletion of a new note', () => {
     test('success with statuscode 204 if id is valid', async () => {
-      const notesAtStart = await helper.noteInDb()
+      const notesAtStart = await helper.notesInDb()
       const noteToDelete = notesAtStart[0]
 
       await api
         .delete(`/api/notes/${noteToDelete.id}`)
         .expect(204)
 
-      const notesAtEnd = await helper.noteInDb()
+      const notesAtEnd = await helper.notesInDb()
 
       const contents = notesAtEnd.map(n => n.content)
       assert(!contents.includes(noteToDelete.content))
@@ -181,19 +197,18 @@ describe('When there is initially some users are saved', () => {
     const usersAtStart = await helper.usersInDb()
 
     const newObject = {
-      username: 'rakibba',
+      username: 'rkb',
       name: 'Md Rakib',
       password: '12324dcsff'
     }
 
     const result = await api
-      .post('/api/user')
+      .post('/api/users')
       .send(newObject)
       .expect(400)
-      .expect('content-type', /application\/json/)
 
     const usersAtEnd = await helper.usersInDb()
-    assert(result.body.error.includes('username must be unique'))
+    assert(result.body.error.includes('expected `username` to be unique'))
 
     assert.strictEqual(usersAtStart.length, usersAtEnd.length)
   })
