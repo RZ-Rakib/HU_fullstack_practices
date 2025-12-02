@@ -1,11 +1,14 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
+const User = require('../models/user')
 const logger = require('../utils/logger')
 const mongoose = require('mongoose')
 
 notesRouter.get('/', async (req, res, next) => {
   try {
-    const notes = await Note.find({})
+    const notes = await Note
+      .find({})
+      .populate('user', { username: 1, name: 1 })
     return res.json(notes)
 
   } catch (error) {
@@ -87,14 +90,25 @@ notesRouter.put('/:id', async (req, res, next) => {
 
 notesRouter.post('/', async (req, res, next) => {
   try {
-    const { content, important } = req.body
+    const { content, important, userId } = req.body
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+      logger.warn('user id is missing')
+      res.status(400).json({ error: 'user id missing or invalid' })
+    }
 
     const note = new Note ({
       content: content,
       important: important ?? false,
+      user: user.id
     })
 
     const savedNote = await note.save()
+
+    user.notes = user.notes.concat(savedNote.id)
+    await user.save()
 
     logger.info(`New note ${ savedNote.content } is successfully created and saved in database`)
     return res.status(201).json(savedNote)

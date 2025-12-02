@@ -4,6 +4,8 @@ const supertest = require('supertest')
 const mongoose = require('mongoose')
 const Note = require('../models/note')
 const helper = require('./test_helper')
+const User = require('../models/user')
+const bcrypt = require('bcrypt')
 const app = require('../app')
 
 const api = supertest(app)
@@ -121,7 +123,7 @@ describe('When there is initially some notes saved', () => {
       assert.strictEqual(notesAtEnd.length, helper.initialNotes.length - 1)
     })
 
-    test('fails with statuscode 404 if a id is valid and no note found', async () => {
+    test('fails with statuscode 404 if id is valid and no note found', async () => {
       const testId = await helper.nonExistingId()
 
       await api
@@ -136,6 +138,64 @@ describe('When there is initially some notes saved', () => {
         .delete(`/api/notes/${invalidId}`)
         .expect(400)
     })
+  })
+})
+
+describe('When there is initially some users are saved', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('1234qwer', 10)
+    const newUser = new User({
+      username: 'rkb',
+      name: 'Rakib zaman',
+      passwordHash
+    })
+
+    await newUser.save()
+  })
+
+  test('creation sucess with a fresh username', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newObject = {
+      username: 'rakibba',
+      name: 'Md Rakib',
+      password: '12324dcsff'
+    }
+
+    await api
+      .post('/api/users')
+      .send(newObject)
+      .expect(201)
+      .expect('content-type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
+
+    const usernames = usersAtEnd.map(user => user.username)
+    assert(usernames.includes(newObject.username))
+  })
+
+  test('creation fails with proper satuscode and message if a username already taken', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newObject = {
+      username: 'rakibba',
+      name: 'Md Rakib',
+      password: '12324dcsff'
+    }
+
+    const result = await api
+      .post('/api/user')
+      .send(newObject)
+      .expect(400)
+      .expect('content-type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    assert(result.body.error.includes('username must be unique'))
+
+    assert.strictEqual(usersAtStart.length, usersAtEnd.length)
   })
 })
 

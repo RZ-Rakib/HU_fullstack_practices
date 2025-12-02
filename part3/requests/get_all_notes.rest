@@ -22,6 +22,21 @@ POST http://localhost:10000/api/notes
 Content-Type: application/json
 
 {
-    "content": "lol",
-    "important": false
+    "content": "this is second note",
+    "important": false,
+    "userId": "692dab78c24b87232f405763"
+
 }
+
+### post a new user
+POST http://localhost:10000/api/users
+Content-Type: application/json
+
+{
+    "username": "RZ0005",
+    "name": "Rakib Zaman",
+    "password": "rakib123@"
+}
+
+### fetch all users
+GET http://localhost:10000/api/users
