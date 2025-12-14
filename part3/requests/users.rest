@@ -1,0 +1,12 @@
+### post a new user
+POST http://localhost:10000/api/users
+Content-Type: application/json
+
+{
+    "username": "RZ0005",
+    "name": "Rakib Zaman",
+    "password": "rakib123@"
+}
+
+### fetch all users
+GET http://localhost:10000/api/users

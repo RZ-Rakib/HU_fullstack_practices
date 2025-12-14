@@ -5,6 +5,7 @@ const config = require('./utils/config')
 const middleware = require('./utils/middleware')
 const notesRouter = require('./controllers/notes')
 const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 const app = express()
 
 logger.info('Server is connecting to Mongodb')
@@ -23,6 +24,7 @@ app.use(middleware.requestLogger)
 
 app.use('/api/notes', notesRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 
 // handler of requests with unknown endpoint
 app.use(middleware.unknownEndpoint)

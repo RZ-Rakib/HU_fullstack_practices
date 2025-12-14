@@ -20,23 +20,9 @@ Content-Type: application/json
 ### create a new note
 POST http://localhost:10000/api/notes
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlJaMDAwNSIsImlkIjoiNjkyZGFiNzhjMjRiODcyMzJmNDA1NzYzIiwiaWF0IjoxNzY1NzIwNjU3fQ.tCxHtYn3HCBPKk8SsMv0n-83IwP03L1j3q8kdmA_dzk
 
 {
-    "content": "this is second note",
-    "important": false,
-    "userId": "692dab78c24b87232f405763"
-
+    "content": "this is a note after authentication",
+    "important": false
 }
-
-### post a new user
-POST http://localhost:10000/api/users
-Content-Type: application/json
-
-{
-    "username": "RZ0005",
-    "name": "Rakib Zaman",
-    "password": "rakib123@"
-}
-
-### fetch all users
-GET http://localhost:10000/api/users

@@ -3,6 +3,8 @@ const Note = require('../models/note')
 const User = require('../models/user')
 const logger = require('../utils/logger')
 const mongoose = require('mongoose')
+const jwt = require('jsonwebtoken')
+const { SECRET } = require('../utils/config')
 
 notesRouter.get('/', async (req, res, next) => {
   try {
@@ -88,11 +90,24 @@ notesRouter.put('/:id', async (req, res, next) => {
   }
 })
 
+const getTokenFrom = req => {
+  const authorization = req.get('authorization')
+  if(authorization && authorization.startsWith('Bearer ')){
+    return authorization.replace('Bearer ', '')
+  }
+  return null
+}
+
 notesRouter.post('/', async (req, res, next) => {
   try {
-    const { content, important, userId } = req.body
+    const { content, important } = req.body
+    const decodedToken = jwt.verify(getTokenFrom(req), SECRET)
 
-    const user = await User.findById(userId)
+    if(!decodedToken.id) {
+      return res.json.status(401).json({ error: 'token invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
 
     if (!user) {
       logger.warn('user id is missing')
@@ -110,7 +125,7 @@ notesRouter.post('/', async (req, res, next) => {
     user.notes = user.notes.concat(savedNote.id)
     await user.save()
 
-    logger.info(`New note ${ savedNote.content } is successfully created and saved in database`)
+    logger.info(`New note '${ savedNote.content }' is successfully created and saved in database`)
     return res.status(201).json(savedNote)
 
   } catch (error) {
