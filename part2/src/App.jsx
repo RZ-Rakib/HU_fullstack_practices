@@ -1,21 +1,22 @@
-import { useState, useEffect } from 'react'
-import Note from './component/Note'
+import { useState, useEffect, useRef } from 'react'
+import Note from './components/Note'
 import noteService from './services/notes'
 import loginService from './services/login'
-import Dialog from './component/Dialog'
-import Footer from './component/Footer'
-import Notification from './component/Notification'
+import Dialog from './components/Dialog'
+import Footer from './components/Footer'
+import Notification from './components/Notification'
+import LoginForm from './components/LoginForm'
+import Toggleable from './components/Togglable'
+import NoteForm from './components/NoteForm'
 
 const App = () => {
   const [notes, setNotes] = useState([])
-  const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedNote, setSelectedNote] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState(null)
   const [user, setUser] = useState(null)
+  const noteFromRef = useRef()
 
   const hook = () => {
     noteService
@@ -42,38 +43,30 @@ const App = () => {
     ? notes
     : notes.filter(note => note.important === true)
 
-  const addNote = (event) => {
-    event.preventDefault()
+  const addNote = async (newNote) => {
 
-    if (notes.some(note => note.content.trim().toLowerCase() === newNote.trim().toLowerCase())) {
-      alert(`${newNote} is already exist in the server.`)
+    if (notes.some(note => note.content.trim().toLowerCase() === newNote.content.trim().toLowerCase())) {
+      setNotificationMessage(`${newNote} is already exist in the server.`)
       return
     }
-    const newObject = {
-      content: newNote,
-      important: Math.random() < 0.5,
-      vote: 0
-    }
-    noteService
-      .create(newObject)
-      .then(createdObject => {
-        setErrorMessage(`Note ${createdObject.content} is created.`)
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 3000);
-        setNotes(prev => prev.concat(createdObject))
-        setNewNote('')
-      })
-      .catch(error => {
-        setErrorMessage(error.response?.data?.error || 'Something went wrong')
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 3000);
-      })
-  }
 
-  const handleNewNote = (event) => {
-    setNewNote(event.target.value)
+    try {
+      noteFromRef.current.toggleVisible()
+
+      const response = await noteService.create(newNote)
+
+      setNotificationMessage(`${response.content} created sucessfully`)
+      setTimeout(() => {
+        setNotificationMessage(null)
+      }, 3000)
+      setNotes(prev => prev.concat(response))
+
+    } catch (error) {
+      setNotificationMessage(error.response?.data?.error || 'Something went wrong')
+      setTimeout(() => {
+        setNotificationMessage(null)
+      }, 3000);
+    }
   }
 
   const toggleImportance = (id) => {
@@ -86,9 +79,9 @@ const App = () => {
         setNotes(prev => prev.map(note => note.id === id ? updatedObject : note))
       })
       .catch(error => {
-        setErrorMessage(`${error.response.data.error}`)
+        setNotificationMessage(`${error.response.data.error}`)
         setTimeout(() => {
-          setErrorMessage(null)
+          setNotificationMessage(null)
         }, 3000)
         setNotes(prev => prev.filter(note => note.id !== id))
       })
@@ -103,19 +96,19 @@ const App = () => {
         setNotes(prev => prev.map(note => note.id === id ? updatedNote : note))
       })
       .catch(error => {
-        setErrorMessage(`${error.response.data.error}`)
+        setNotificationMessage(`${error.response.data.error}`)
         setTimeout(() => {
-          setErrorMessage(null)
+          setNotificationMessage(null)
         }, 3000)
         setNotes(prev => prev.filter(note => note.id !== id))
       })
   }
+
   // dialog handle functions
   const handleDelete = (note) => {
     console.log("note ==> ", note);
     setSelectedNote(note)
     setDialogOpen(true)
-
   }
 
   const handleYes = () => {
@@ -124,18 +117,18 @@ const App = () => {
       noteService
         .remove(selectedNote.id)
         .then(() => {
-          setErrorMessage(`${deletedNoteContent} is sucessfully removed`)
+          setNotificationMessage(`${deletedNoteContent} is sucessfully removed`)
           setTimeout(() => {
-            setErrorMessage(null)
+            setNotificationMessage(null)
           }, 3000);
           setNotes(prev => prev.filter(note => note.id !== selectedNote.id))
           setDialogOpen(false)
           setSelectedNote(null)
         })
         .catch(error => {
-          setErrorMessage(`${error.response.data.error}`)
+          setNotificationMessage(`${error.response.data.error}`)
           setTimeout(() => {
-            setErrorMessage(null)
+            setNotificationMessage(null)
           }, 3000)
           setNotes(prev => prev.filter(note => note.id !== selectedNote.id))
           setDialogOpen(false)
@@ -149,8 +142,8 @@ const App = () => {
     setSelectedNote(null)
   }
 
-  const handleLogin = async (event) => {
-    event.preventDefault()
+  // login form handle functions
+  const handleLogin = async (username, password) => {
 
     try {
       const user = await loginService.login({ username, password })
@@ -158,60 +151,60 @@ const App = () => {
       window.localStorage.setItem(
         'loggedNoteappUser', JSON.stringify(user)
       )
+
+      noteService.setToken(user.token)
+
       setUser(user)
-      setUsername('')
-      setPassword('')
+      setNotificationMessage(`Welcome ${user.username}`)
+      setTimeout(() => {
+        setNotificationMessage(null)
+      }, 4000)
 
     } catch {
-      setErrorMessage('Wrong credentials')
+      setNotificationMessage('Wrong credentials')
       setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+        setNotificationMessage(null)
+      }, 4000)
     }
   }
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        <label>
-          username
-          <input
-            type="text"
-            value={username}
-            onChange={({ target }) => setUsername(target.value)}
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          password
-          <input
-            type="password"
-            value={password}
-            onChange={({ target }) => setPassword(target.value)}
-          />
-        </label>
-      </div>
-      <button type="submit">login</button>
-    </form>
-  )
+  const loginForm = () => {
+    return (
+      <Toggleable buttonLabel='log in' >
+        <LoginForm
+          userLogin={handleLogin}
+        />
+      </Toggleable>
+    )
+  }
 
-  const noteForm = () => (
-    <form onSubmit={addNote}>
-      <input value={newNote} onChange={handleNewNote} />
-      <button type='submit'>save</button>
-    </form>
-  )
+  const noteForm = () => {
+    return (
+      <Toggleable buttonLabel='new note' ref={noteFromRef}>
+        <NoteForm
+          createNote={addNote}
+        />
+      </Toggleable>
+    )
+  }
 
+  const handleLogout = async () => {
+    window.localStorage.removeItem('loggedNoteappUser')
+    setUser(null)
+  }
   return (
     <div>
       <h1>Notes</h1>
-      <Notification message={errorMessage} />
+      <Notification message={notificationMessage} />
+      <hr />
 
       {!user && loginForm()}
       {user && (
         <div>
-          <p>{user.name} logged in</p>
+          <p>
+            {user.name} logged in
+            <button onClick={handleLogout}>logout</button>
+          </p>
           {noteForm()}
         </div>
       )}
