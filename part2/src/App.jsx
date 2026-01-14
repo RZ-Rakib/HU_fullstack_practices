@@ -25,7 +25,7 @@ const App = () => {
         setNotes(initialNotes)
       })
       .catch(error => {
-        console.log("error ==> ", error);
+        console.log('error ==> ', error)
       })
   }
   useEffect(hook, [])
@@ -65,7 +65,7 @@ const App = () => {
       setNotificationMessage(error.response?.data?.error || 'Something went wrong')
       setTimeout(() => {
         setNotificationMessage(null)
-      }, 3000);
+      }, 3000)
     }
   }
 
@@ -106,7 +106,7 @@ const App = () => {
 
   // dialog handle functions
   const handleDelete = (note) => {
-    console.log("note ==> ", note);
+    console.log('note ==> ', note)
     setSelectedNote(note)
     setDialogOpen(true)
   }
@@ -120,7 +120,7 @@ const App = () => {
           setNotificationMessage(`${deletedNoteContent} is sucessfully removed`)
           setTimeout(() => {
             setNotificationMessage(null)
-          }, 3000);
+          }, 3000)
           setNotes(prev => prev.filter(note => note.id !== selectedNote.id))
           setDialogOpen(false)
           setSelectedNote(null)
