@@ -106,7 +106,6 @@ const App = () => {
 
   // dialog handle functions
   const handleDelete = (note) => {
-    console.log('note ==> ', note)
     setSelectedNote(note)
     setDialogOpen(true)
   }
