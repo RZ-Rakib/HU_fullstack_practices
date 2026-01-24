@@ -6,7 +6,6 @@ describe('<Notification />', () => {
     const { container } = render(
       <Notification message={null} />
     )
-
     expect(container).toBeEmptyDOMElement()
   })
 
