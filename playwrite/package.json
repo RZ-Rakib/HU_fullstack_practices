@@ -1,0 +1,23 @@
+{
+  "name": "playwrite",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "RZ Rakib",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "playwright test",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@playwright/test": "^1.58.0",
+    "@stylistic/eslint-plugin": "^5.7.1",
+    "@types/node": "^25.0.10",
+    "eslint": "^9.39.2",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^17.1.0"
+  }
+}
