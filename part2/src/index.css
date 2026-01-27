@@ -2,8 +2,8 @@ h1 {
   color: green;
 }
 .error {
-  color: red;
-  background: lightblue;
+  color: rgb(255, 0, 0);
+  background: rgb(173, 216, 230);
   border-radius: 10px;
   border-style: solid;
   font-size: 20px;

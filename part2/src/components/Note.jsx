@@ -11,8 +11,8 @@ const Note = ({ note, toggleImportance, handleVotes, handleDelete }) => {
 
   return (
     <div>
-      <li className="note">
-        Your content: {note.content}{' '}
+      <li>
+        {note.content}{' '}
         <button onClick={toggleImportance}>{label}</button>
       </li>
       {note.vote} Votes

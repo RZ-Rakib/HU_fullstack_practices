@@ -55,7 +55,7 @@ const App = () => {
 
       const response = await noteService.create(newNote)
 
-      setNotificationMessage(`${response.content} created sucessfully`)
+      setNotificationMessage(`${response.content} created successfully`)
       setTimeout(() => {
         setNotificationMessage(null)
       }, 3000)
