@@ -10,15 +10,14 @@ const Note = ({ note, toggleImportance, handleVotes, handleDelete }) => {
     : 'make important'
 
   return (
-    <div>
-      <li>
-        {note.content}{' '}
-        <button onClick={toggleImportance}>{label}</button>
-      </li>
+    <li className="note">
+      <span>{note.content}</span>
+      <button onClick={toggleImportance}>{label}</button>
+      <br />
       {note.vote} Votes
       <button onClick={handleVotes}>👍</button>{' '}
       <button onClick={handleDelete}>Delete</button>
-    </div >
+    </li>
   )
 }
 
