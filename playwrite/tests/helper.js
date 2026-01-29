@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test'
+
 const loginWith = async(page, username, password) => {
   await page.getByRole('button', { name: /log in/i }).click()
   await page.getByLabel(/username/i).fill(username)
@@ -9,6 +11,7 @@ const createNote = async(page, content) => {
   await page.getByRole('button', { name: /new note/i }).click()
   await page.getByPlaceholder(/enter a new note/i).fill(content)
   await page.getByRole('button', { name: /save/i }).click()
+  await expect(page.locator('ul > li', { hasText: `${content}` })).toBeVisible()
 }
 
 export { loginWith, createNote }

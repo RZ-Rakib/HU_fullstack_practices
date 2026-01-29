@@ -4,8 +4,8 @@ const { loginWith, createNote } = require('./helper')
 
 describe('Note app', () => {
   beforeEach(async ({ page, request }) => {
-    await request.post('http://localhost:3001/api/testing/reset')
-    await request.post('http://localhost:3001/api/users', {
+    await request.post('/api/testing/reset')
+    await request.post('/api/users', {
       data: {
         name: 'Rakib Zaman',
         username: 'rakib',
@@ -13,7 +13,7 @@ describe('Note app', () => {
       }
     })
 
-    await page.goto('http://localhost:5173')
+    await page.goto('/')
   })
 
   test('front page can be opened', async ({ page }) => {
@@ -44,18 +44,21 @@ describe('Note app', () => {
     })
 
     test('a new note can be created', async ({ page }) => {
-      await createNote(page, 'a new note is created by Playwright created successfully')
-      await expect(page.locator('.first-li')).toContainText(/a new note is created by Playwright created successfully/i)
+      await createNote(page, 'a new note')
+      await expect(page.locator('li')).toContainText(/a new note/i)
     })
 
-    describe('and a note exists', () => {
+    describe('and several notes exists', () => {
       beforeEach(async ({ page }) => {
-        await createNote(page, 'another note by Playwright')
+        await createNote(page, 'first note')
+        await createNote(page, 'second note')
+        await createNote(page, 'third note')
       })
 
-      test('importance can be changed', async ({ page }) => {
-        await page.getByRole('button', { name: /make not important/i }).click()
-        await expect(page.getByText(/make important/i)).toBeVisible()
+      test('one of those can be made nonimportant', async ({ page }) => {
+        const oneNoteElement = page.locator('li.note', { hasText: 'second note' })
+        await oneNoteElement.getByRole('button', { name: /make not important/i }).click()
+        await expect(oneNoteElement.getByRole('button', { name: /make important/i })).toBeVisible()
       })
     })
   })
